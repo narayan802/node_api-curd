@@ -10,7 +10,7 @@ const PORT = 8000;
 // Middleware
 app.use(bodyParser.json());
 
-// Routes
+// Prifix Routes
 app.use('/api', customerRoutes);
 
 // Start the server

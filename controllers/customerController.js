@@ -2,7 +2,8 @@ const db = require('../db.config');
 const Customer = require('../models/customer');
 
 const jwt = require('jsonwebtoken');
-const secretKey = process.env.SECRETKEY;
+require('dotenv').config();
+
 
 function authenticatedCheck(req, res) {
     const { email } = req.body;
@@ -14,6 +15,7 @@ function authenticatedCheck(req, res) {
                 return res.status(404).send({ message: 'User not found.' });
             }
 
+            const secretKey = process.env.SECRETKEY;
             const token = jwt.sign({ id: customer.id, email: customer.email }, secretKey, { expiresIn: '1h' });
             console.log('Generated Token:', token);
 
