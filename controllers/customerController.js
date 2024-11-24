@@ -1,18 +1,48 @@
 const db = require('../db.config');
 const Customer = require('../models/customer');
 
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SECRETKEY;
+
+function authenticatedCheck(req, res) {
+    const { email } = req.body;
+
+
+    Customer.findOne({ where: { email } })
+        .then(customer => {
+            if (!customer) {
+                return res.status(404).send({ message: 'User not found.' });
+            }
+
+            const token = jwt.sign({ id: customer.id, email: customer.email }, secretKey, { expiresIn: '1h' });
+            console.log('Generated Token:', token);
+
+            res.status(200).send({
+                message: 'You are Authenticated.',
+                token: token,
+            });
+        })
+        .catch(error => {
+            res.status(500).send({
+                message: 'You are Not Authenticated.',
+                error: error.message || error,
+            });
+        });
+}
+
+
+
 
 function createCustomer(req, res) {
     const { name, email, age } = req.body;
 
-    // Validate 'name' field
     if (!name) {
         return res.status(400).send({
             message: "The 'name' field is required.",
         });
     }
 
-    // Validate 'email' field
+
     if (!email) {
         return res.status(400).send({
             message: "The 'email' field is required.",
@@ -26,7 +56,7 @@ function createCustomer(req, res) {
         });
     }
 
-    // Validate 'age' field
+
     if (age === undefined || age === null) {
         return res.status(400).send({
             message: "The 'age' field is required.",
@@ -48,7 +78,7 @@ function createCustomer(req, res) {
                 });
             }
 
-            // If email does not exist, create a new customer
+            
             const customerModel = { name, email, age };
 
             return Customer.create(customerModel);
@@ -140,7 +170,7 @@ function updateCustomer(req, res) {
         });
 }
 
-// Delete a customer
+
 function deleteCustomer(req, res) {
     const { id } = req.params;
 
@@ -165,9 +195,11 @@ function deleteCustomer(req, res) {
 }
 
 module.exports = {
+    authenticatedCheck,
     createCustomer,
     findAllCustomer,
     findCustomerById,
     updateCustomer,
     deleteCustomer,
+
 };
